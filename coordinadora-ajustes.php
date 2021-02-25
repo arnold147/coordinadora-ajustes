@@ -63,7 +63,17 @@ function AECoordinadora_show_field_3dbin( $order ) {
    $order_id = $order->get_id(); 
 
 	$dbin_field_meta = get_post_meta( $order_id, '_3dbin_field', true );
+	
+	
   
+	$campo3dbinVacio = strlen($dbin_field_meta);
+
+	if($campo3dbinVacio < 32){
+		$dbin_field_meta_code = $order->get_shipping_postcode();
+		
+		$dbin_field_meta = traer3dbinpakinRespuesta($dbin_field_meta_code);
+	}
+	
    if($dbin_field_meta) {	
 
 	$cajadbin = html_entity_decode($dbin_field_meta);	
@@ -242,7 +252,7 @@ function add_checkout_script() { ?>
 			
 				
 			<?php // Actualizar el ajax del checkout al cargar la pagina	?>
-			setTimeout(function(){jQuery(document.body).trigger("update_checkout");}, 3000);
+			//setTimeout(function(){jQuery(document.body).trigger("update_checkout");}, 3000);  
 			
 
 			
@@ -255,7 +265,7 @@ function add_checkout_script() { ?>
 				if(codigopostalcookie != cookieWoocomerce){
 					jQuery(document.body).trigger("update_checkout");
 				}
-				console.log(cookieWoocomerce);
+				//console.log(cookieWoocomerce);
 				colocarCookieEnCampoCodigoPostal();				
 				
 			});
@@ -268,6 +278,20 @@ function add_checkout_script() { ?>
 <?php       
 }
 add_action( 'woocommerce_after_checkout_form', 'add_checkout_script' );
+
+
+
+function traer3dbinpakinRespuesta($hashCarrito){  
+		global $wpdb;
+		
+		$tabla_Binpaking = $wpdb->prefix . 'binpaking';
+		
+		$hashCarrito = sanitize_text_field($hashCarrito);
+		
+		$consulta = $wpdb->get_row("SELECT valor FROM $tabla_Binpaking WHERE hash = '$hashCarrito' ORDER BY `id` DESC;");
+
+		return $consulta->valor;
+}
 
 
 
